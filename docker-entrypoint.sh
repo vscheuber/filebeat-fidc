@@ -13,14 +13,14 @@ cat >$TEMPLATE_FILE <<EOF
 filebeat.inputs:
 - type: httpjson
   config_version: 2
-  request.url: ##ORIGIN##/monitoring/logs/tail
+  request.url: ##FIDC_TENANT_URL##/monitoring/logs/tail
   auth.basic:
-    user: ##API_KEY_ID##
-    password: ##API_KEY_SECRET##
+    user: ##FIDC_API_KEY_ID##
+    password: ##FIDC_API_KEY_SECRET##
   request.transforms:
     - set:
         target: url.params.source
-		value: '##LOG_SOURCE##'
+		value: '##FIDC_LOG_SOURCES##'
     - set:
         target: url.params._pagedResultsCookie
         value: '[[.last_response.body.pagedResultsCookie]]'
@@ -34,7 +34,7 @@ filebeat.inputs:
     transforms:
       - set:
           target: body.tenant
-          value: '##ORIGIN##'
+          value: '##FIDC_TENANT_URL##'
 processors:
   - decode_json_fields:
       fields: ["message"]
@@ -116,10 +116,10 @@ EOF
 
 # set values in config file from env vars
 sed \
-    -e "s@##ORIGIN##@$ORIGIN@g" \
-    -e "s@##API_KEY_ID##@$API_KEY_ID@g" \
-    -e "s@##API_KEY_SECRET##@$API_KEY_SECRET@g" \
-    -e "s@##LOG_SOURCE##@$LOG_SOURCE@g" \
+    -e "s@##FIDC_TENANT_URL##@$FIDC_TENANT_URL@g" \
+    -e "s@##FIDC_API_KEY_ID##@$FIDC_API_KEY_ID@g" \
+    -e "s@##FIDC_API_KEY_SECRET##@$FIDC_API_KEY_SECRET@g" \
+    -e "s@##FIDC_LOG_SOURCES##@$FIDC_LOG_SOURCES@g" \
     $TEMPLATE_FILE >>$CONFIG_FILE
 
 #./filebeat -e -c $CONFIG_FILE
