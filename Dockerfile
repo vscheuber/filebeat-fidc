@@ -5,7 +5,13 @@ LABEL modifiedby="Volker Scheuber <volker.scheuber@forgerock.com>"
 LABEL description="filebeat docker image for ForgeRock Identity Cloud logs"
 
 ENV FILEBEAT_VERSION=7.11.2 \
-    FILEBEAT_SHA1=d00eb13b12b0a271d10598b6aaee7c11ff2e8d3db42f6a7404eeb0e93af2751882d47c5a6735d2bee0ccb3267de9574970487d6167d0830794f5597fcd6cad94
+    FILEBEAT_SHA1=d00eb13b12b0a271d10598b6aaee7c11ff2e8d3db42f6a7404eeb0e93af2751882d47c5a6735d2bee0ccb3267de9574970487d6167d0830794f5597fcd6cad94 \
+    ELASTIC_HOST= \
+    ELASTIC_PORT= \
+    FIDC_TENANT_URL= \
+    FIDC_API_KEY_ID= \
+    FIDC_API_KEY_SECRET= \
+    FIDC_LOG_SOURCES=
 
 RUN set -x && \
   apt-get update && \
