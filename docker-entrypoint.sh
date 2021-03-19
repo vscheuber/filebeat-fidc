@@ -20,7 +20,7 @@ filebeat.inputs:
   request.transforms:
     - set:
         target: url.params.source
-        value: '##LOG_SOURCE##'
+		value: '##LOG_SOURCE##'
     - set:
         target: url.params._pagedResultsCookie
         value: '[[.last_response.body.pagedResultsCookie]]'
@@ -101,8 +101,8 @@ processors:
           ignore_missing: false
           fail_on_error: true
 output.elasticsearch:
-  hosts: ["http://elk:9200"]
-  pipeline: geoip-and-useragent
+  hosts: ["##ELK_HOST##:##ELASTIC_PORT##"]
+  pipeline: fidc
 setup.template:
   type: "index"
   append_fields:
@@ -124,22 +124,6 @@ sed \
 
 #./filebeat -e -c $CONFIG_FILE
 #rm -f $CONFIG_FILE
-
-# wait for Kibana
-if [ -z "$KIBANA_URL" ]; then
-    KIBANA_URL=http://elk:5601
-fi
-counter=0
-echo "Will wait for 60s for Kibana to start ..."
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${KIBANA_URL}/api/status)" != "200" && $counter -lt 60 ]]; do
-    sleep 1
-    ((counter++))
-    echo "waiting for Kibana to respond ($counter/60)"
-done
-if [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${KIBANA_URL}/api/status)" != "200" ]]; then
-    echo "Timed out waiting for Kibana to respond. Exiting."
-    exit 1
-fi
 
 # Add filebeat as command if needed
 if [ "${1:0:1}" = '-' ]; then
