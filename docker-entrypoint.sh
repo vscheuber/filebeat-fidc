@@ -13,6 +13,10 @@ cat >$TEMPLATE_FILE <<EOF
 filebeat.inputs:
 - type: httpjson
   config_version: 2
+  enabled: true
+  tags: ["fidc"]
+  fields_under_root: true
+  publisher_pipeline.disable_host: true
   request.url: ##FIDC_TENANT_URL##/monitoring/logs/tail
   auth.basic:
     user: ##FIDC_API_KEY_ID##
@@ -20,7 +24,7 @@ filebeat.inputs:
   request.transforms:
     - set:
         target: url.params.source
-		value: '##FIDC_LOG_SOURCES##'
+        value: '##FIDC_LOG_SOURCES##'
     - set:
         target: url.params._pagedResultsCookie
         value: '[[.last_response.body.pagedResultsCookie]]'
@@ -35,6 +39,7 @@ filebeat.inputs:
       - set:
           target: body.tenant
           value: '##FIDC_TENANT_URL##'
+
 processors:
   - decode_json_fields:
       fields: ["message"]
@@ -100,30 +105,57 @@ processors:
               to: "json_payload"
           ignore_missing: false
           fail_on_error: true
+
 output.elasticsearch:
-  hosts: ["##ELK_HOST##:##ELASTIC_PORT##"]
+  hosts: ["##ELASTIC_HOST##:##ELASTIC_PORT##"]
+  indices:
+    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[json_payload.topic]}-%{[agent.version]}-%{+yyyy.MM.dd}"
+    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[agent.version]}-%{+yyyy.MM.dd}"
+    - index: "fidc-##FIDC_TENANT_NAME##-debug-%{[agent.version]}-%{+yyyy.MM.dd}"
   pipeline: fidc
+
 setup.template:
   type: "index"
+  name: "fidc"
+  pattern: "fidc-*"
+  settings:
+    index.number_of_replicas: 0
   append_fields:
     - name: json_payload
       type: object
+    - name: json_payload.entries
+      type: nested
+      include_in_parent: true
     - name: text_payload
       type: text
     - name: geoip.location
       type: geo_point
+
+# disable ILM so that filebeat honors the index and index template settings
+setup.ilm.enabled: false
+ilm.enabled: false
+
+# turn off metrics logging to suppress the log entries
+logging.metrics.enabled: false
 EOF
 
 # set values in config file from env vars
 sed \
+    -e "s@##FIDC_TENANT_NAME##@$FIDC_TENANT_NAME@g" \
     -e "s@##FIDC_TENANT_URL##@$FIDC_TENANT_URL@g" \
     -e "s@##FIDC_API_KEY_ID##@$FIDC_API_KEY_ID@g" \
     -e "s@##FIDC_API_KEY_SECRET##@$FIDC_API_KEY_SECRET@g" \
     -e "s@##FIDC_LOG_SOURCES##@$FIDC_LOG_SOURCES@g" \
-    $TEMPLATE_FILE >>$CONFIG_FILE
+    -e "s@##ELASTIC_HOST##@$ELASTIC_HOST@g" \
+    -e "s@##ELASTIC_PORT##@$ELASTIC_PORT@g" \
+    $TEMPLATE_FILE >$CONFIG_FILE
 
 #./filebeat -e -c $CONFIG_FILE
 #rm -f $CONFIG_FILE
+
+echo "--- begin config file ---"
+cat $CONFIG_FILE
+echo "--- end config file ---"
 
 # Add filebeat as command if needed
 if [ "${1:0:1}" = '-' ]; then
