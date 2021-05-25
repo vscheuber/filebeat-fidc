@@ -14,6 +14,7 @@ filebeat.inputs:
 - type: httpjson
   config_version: 2
   enabled: true
+  interval: 10s
   tags: ["fidc"]
   fields_under_root: true
   publisher_pipeline.disable_host: true
@@ -21,6 +22,7 @@ filebeat.inputs:
   auth.basic:
     user: ##FIDC_API_KEY_ID##
     password: ##FIDC_API_KEY_SECRET##
+  request.timeout: 1m
   request.transforms:
     - set:
         target: url.params.source
@@ -111,6 +113,7 @@ output.elasticsearch:
   indices:
     - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[json_payload.topic]}-%{[agent.version]}-%{+yyyy.MM.dd}"
     - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[agent.version]}-%{+yyyy.MM.dd}"
+    - index: "fidc-##FIDC_TENANT_NAME##-audit-%{[json_payload.eventName]}-%{[agent.version]}-%{+yyyy.MM.dd}"
     - index: "fidc-##FIDC_TENANT_NAME##-debug-%{[agent.version]}-%{+yyyy.MM.dd}"
   pipeline: fidc
 
