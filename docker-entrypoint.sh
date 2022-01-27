@@ -40,7 +40,7 @@ filebeat.inputs:
     transforms:
       - set:
           target: body.tenant
-          value: '##FIDC_TENANT_URL##'
+          value: '##FIDC_TENANT_NAME##'
 
 processors:
   - decode_json_fields:
