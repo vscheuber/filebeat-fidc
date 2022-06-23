@@ -4,15 +4,21 @@ LABEL original="https://github.com/primait/docker-filebeat"
 LABEL modifiedby="Volker Scheuber <volker.scheuber@forgerock.com>"
 LABEL description="filebeat docker image for ForgeRock Identity Cloud logs"
 
-ENV FILEBEAT_VERSION=7.11.2 \
-    FILEBEAT_SHA1=d00eb13b12b0a271d10598b6aaee7c11ff2e8d3db42f6a7404eeb0e93af2751882d47c5a6735d2bee0ccb3267de9574970487d6167d0830794f5597fcd6cad94 \
-    ELASTIC_HOST= \
-    ELASTIC_PORT= \
+ENV FILEBEAT_VERSION=7.17.4 \
+    FILEBEAT_SHA1=eece85d1007e8f58ccc65ea5bbfcd5c2b733f05a4d9e051f9d75f79dac9678d643b53345be8f1dae95a85118061cd41ce72ce959fdde95f7cb5cd7a853444aff \
+    ELASTIC_HOST=bi.scheuber.io \
+    ELASTIC_PORT=9200 \
     FIDC_TENANT_NAME= \
     FIDC_TENANT_URL= \
     FIDC_API_KEY_ID= \
     FIDC_API_KEY_SECRET= \
-    FIDC_LOG_SOURCES=
+    FIDC_LOG_SOURCES=am-everything,idm-everything \
+    FIDC_TAIL_ENABLED=true \
+    FIDC_TAIL_INTERVAL=10s \
+    FIDC_LOGS_ENABLED=false \
+    FIDC_LOGS_INTERVAL=3s \
+    FIDC_LOGS_BEGIN_TIME=yyyy-mm-ddThh:mm:ss.ssZ \
+    FIDC_LOGS_END_TIME=yyyy-mm-ddThh:mm:ss.ssZ
 
 RUN set -x && \
   apt-get update && \

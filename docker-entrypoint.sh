@@ -13,8 +13,8 @@ cat >$TEMPLATE_FILE <<EOF
 filebeat.inputs:
 - type: httpjson
   config_version: 2
-  enabled: true
-  interval: 10s
+  enabled: ##FIDC_TAIL_ENABLED##
+  interval: ##FIDC_TAIL_INTERVAL##
   tags: ["fidc"]
   fields_under_root: true
   publisher_pipeline.disable_host: true
@@ -27,6 +27,42 @@ filebeat.inputs:
     - set:
         target: url.params.source
         value: '##FIDC_LOG_SOURCES##'
+    - set:
+        target: url.params._pagedResultsCookie
+        value: '[[.last_response.body.pagedResultsCookie]]'
+  request.rate_limit:
+    limit: '[[.last_response.header.Get "x-ratelimit-limit"]]'
+    remaining: '[[.last_response.header.Get "x-ratelimit-remaining"]]'
+    reset: '[[.last_response.header.Get "x-ratelimit-reset"]]'
+  response.split:
+    target: body.result
+    type: array
+    transforms:
+      - set:
+          target: body.tenant
+          value: '##FIDC_TENANT_NAME##'
+- type: httpjson
+  config_version: 2
+  enabled: ##FIDC_LOGS_ENABLED##
+  interval: ##FIDC_LOGS_INTERVAL##
+  tags: ["fidc"]
+  fields_under_root: true
+  publisher_pipeline.disable_host: true
+  request.url: ##FIDC_TENANT_URL##/monitoring/logs
+  auth.basic:
+    user: ##FIDC_API_KEY_ID##
+    password: ##FIDC_API_KEY_SECRET##
+  request.timeout: 1m
+  request.transforms:
+    - set:
+        target: url.params.source
+        value: '##FIDC_LOG_SOURCES##'
+    - set:
+        target: url.params.beginTime
+        value: '##FIDC_LOGS_BEGIN_TIME##'
+    - set:
+        target: url.params.endTime
+        value: '##FIDC_LOGS_END_TIME##'
     - set:
         target: url.params._pagedResultsCookie
         value: '[[.last_response.body.pagedResultsCookie]]'
@@ -149,6 +185,12 @@ sed \
     -e "s@##FIDC_API_KEY_ID##@$FIDC_API_KEY_ID@g" \
     -e "s@##FIDC_API_KEY_SECRET##@$FIDC_API_KEY_SECRET@g" \
     -e "s@##FIDC_LOG_SOURCES##@$FIDC_LOG_SOURCES@g" \
+    -e "s@##FIDC_TAIL_ENABLED##@$FIDC_TAIL_ENABLED@g" \
+    -e "s@##FIDC_TAIL_INTERVAL##@$FIDC_TAIL_INTERVAL@g" \
+    -e "s@##FIDC_LOGS_ENABLED##@$FIDC_LOGS_ENABLED@g" \
+    -e "s@##FIDC_LOGS_INTERVAL##@$FIDC_LOGS_INTERVAL@g" \
+    -e "s@##FIDC_LOGS_BEGIN_TIME##@$FIDC_LOGS_BEGIN_TIME@g" \
+    -e "s@##FIDC_LOGS_END_TIME##@$FIDC_LOGS_END_TIME@g" \
     -e "s@##ELASTIC_HOST##@$ELASTIC_HOST@g" \
     -e "s@##ELASTIC_PORT##@$ELASTIC_PORT@g" \
     $TEMPLATE_FILE >$CONFIG_FILE
