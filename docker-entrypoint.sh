@@ -147,10 +147,10 @@ processors:
 output.elasticsearch:
   hosts: ["##ELASTIC_HOST##:##ELASTIC_PORT##"]
   indices:
-    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[json_payload.topic]}-%{[agent.version]}-%{+yyyy.MM.dd}"
-    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[agent.version]}-%{+yyyy.MM.dd}"
-    - index: "fidc-##FIDC_TENANT_NAME##-audit-%{[json_payload.eventName]}-%{[agent.version]}-%{+yyyy.MM.dd}"
-    - index: "fidc-##FIDC_TENANT_NAME##-debug-%{[agent.version]}-%{+yyyy.MM.dd}"
+    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[json_payload.topic]}"
+    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}"
+    - index: "fidc-##FIDC_TENANT_NAME##-audit-%{[json_payload.eventName]}"
+    - index: "fidc-##FIDC_TENANT_NAME##-debug"
   pipeline: fidc
 
 setup.template:
