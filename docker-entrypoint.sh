@@ -147,16 +147,14 @@ processors:
 output.elasticsearch:
   hosts: ["##ELASTIC_HOST##:##ELASTIC_PORT##"]
   indices:
-    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}-%{[json_payload.topic]}"
-    - index: "fidc-##FIDC_TENANT_NAME##-%{[json_payload.source]}"
-    - index: "fidc-##FIDC_TENANT_NAME##-audit-%{[json_payload.eventName]}"
-    - index: "fidc-##FIDC_TENANT_NAME##-debug"
+    - index: "fidc-%{[json_payload.source]}-%{[json_payload.topic]}-##FIDC_TENANT_NAME##"
+    - index: "fidc-%{[json_payload.source]}-##FIDC_TENANT_NAME##"
+    - index: "fidc-audit-%{[json_payload.eventName]}-##FIDC_TENANT_NAME##"
+    - index: "fidc-debug-##FIDC_TENANT_NAME##"
   pipeline: fidc
 
 setup.template:
   type: "index"
-  name: "fidc"
-  pattern: "fidc-*"
   settings:
     index.number_of_replicas: 0
   append_fields:
@@ -170,9 +168,8 @@ setup.template:
     - name: geoip.location
       type: geo_point
 
-# disable ILM so that filebeat honors the index and index template settings
-setup.ilm.enabled: false
-ilm.enabled: false
+# enable index lifecyle management
+setup.ilm.enabled: true
 
 # turn off metrics logging to suppress the log entries
 logging.metrics.enabled: false
