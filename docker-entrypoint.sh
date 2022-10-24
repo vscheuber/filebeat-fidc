@@ -155,6 +155,8 @@ output.elasticsearch:
 
 setup.template:
   type: "index"
+  name: "fidc"
+  pattern: "fidc-*"
   settings:
     index.number_of_replicas: 0
   append_fields:
@@ -168,8 +170,8 @@ setup.template:
     - name: geoip.location
       type: geo_point
 
-# enable index lifecyle management
-setup.ilm.enabled: true
+# disable ILM so that filebeat honors the index and index template settings
+setup.ilm.enabled: false
 
 # turn off metrics logging to suppress the log entries
 logging.metrics.enabled: false
