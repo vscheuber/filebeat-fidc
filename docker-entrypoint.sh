@@ -155,21 +155,38 @@ output.elasticsearch:
   pipeline: fidc
 
 setup.template:
-  type: "index"
-  name: "fidc"
-  pattern: "fidc-*"
-  settings:
-    index.number_of_replicas: 0
-  append_fields:
-    - name: json_payload
-      type: object
-    - name: json_payload.entries
-      type: nested
-      include_in_parent: true
-    - name: text_payload
-      type: text
-    - name: geoip.location
-      type: geo_point
+  - name: "fidc-audit"
+    pattern: "fidc-audit-*"
+    settings:
+      index.number_of_replicas: 0
+      index.lifecycle.name: "365-days-default",      
+      index.lifecycle.rollover_alias: "fidc-audit"
+    append_fields:
+      - name: json_payload
+        type: object
+      - name: json_payload.entries
+        type: nested
+        include_in_parent: true
+      - name: text_payload
+        type: text
+      - name: geoip.location
+        type: geo_point
+  - name: "fidc-debug"
+    pattern: "fidc-debug-*"
+    settings:
+      index.number_of_replicas: 0
+      index.lifecycle.name: "7-days-default",      
+      index.lifecycle.rollover_alias: "fidc-debug"
+    append_fields:
+      - name: json_payload
+        type: object
+      - name: json_payload.entries
+        type: nested
+        include_in_parent: true
+      - name: text_payload
+        type: text
+      - name: geoip.location
+        type: geo_point
 
 # disable ILM so that filebeat honors the index and index template settings
 setup.ilm.enabled: false
