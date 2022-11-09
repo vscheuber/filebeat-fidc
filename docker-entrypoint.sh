@@ -103,6 +103,8 @@ processors:
           fields:
             - from: "payload"
               to: "text_payload"
+            - from: "source"
+              to: "fidc_source"
           ignore_missing: false
           fail_on_error: true
     else:
@@ -141,6 +143,8 @@ processors:
           fields:
             - from: "payload"
               to: "json_payload"
+            - from: "source"
+              to: "fidc_source"
           ignore_missing: false
           fail_on_error: true
 
@@ -157,6 +161,7 @@ output.elasticsearch:
 setup.template:
     name: "fidc-*"
     pattern: "fidc-*"
+    overwrite: false
     settings:
       index.number_of_replicas: 0
     append_fields:
@@ -169,6 +174,8 @@ setup.template:
         type: text
       - name: geoip.location
         type: geo_point
+      - name: fidc_source
+        type: text
 
 # disable ILM so that filebeat honors the index and index template settings
 setup.ilm.enabled: false
